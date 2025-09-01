@@ -1,0 +1,4 @@
+requests>=2.25.1
+mutagen>=1.45.1
+rich>=10.0.0
+yt-dlp>=2023.07.06
