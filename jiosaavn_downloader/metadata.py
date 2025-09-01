@@ -86,7 +86,7 @@ def _add_metadata(file_path, song_info, cover_art_path=None, console=None):
                 if console:
                     console.print(f"[yellow]Warning adding cover art: {e}[/yellow]")
         
-        audio.save()
+        audio.save(v2_version=3)  # Save with ID3v2.3 for better compatibility
     
     if console:
         console.print(f"[green]Metadata added to:[/green] {os.path.basename(file_path)}")

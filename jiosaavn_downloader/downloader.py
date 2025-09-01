@@ -89,8 +89,18 @@ class JioSaavnDownloader:
             '--audio-quality', audio_quality,
             '--output', output_template,
             '--add-metadata',
-            '--newline'  # Important for progress parsing
+            '--newline',  # Important for progress parsing
+            '--no-check-certificate',  # Avoid SSL issues
+            '--no-warnings',  # Reduce unnecessary output
+            '--quiet',  # Reduce verbosity
+            '--no-call-home'  # Disable telemetry
         ]
+        
+        # For audio-only downloads, specify we want the best audio stream only
+        if format in ['mp3', 'flac', 'm4a', 'opus', 'wav']:
+            cmd.extend(['--format', 'bestaudio/best'])
+            # Prevent downloading video files
+            cmd.extend(['--restrict-filenames'])  # Use only ASCII characters in filenames
         
         # Add postprocessor args for specific formats
         if format == "mp3":
@@ -167,6 +177,11 @@ class JioSaavnDownloader:
             
             # Wait for process to complete
             process.wait()
+            
+            # Ensure process is completely terminated
+            if process.poll() is None:
+                process.terminate()
+                process.wait()
             
             if progress_bar:
                 progress_bar.stop()

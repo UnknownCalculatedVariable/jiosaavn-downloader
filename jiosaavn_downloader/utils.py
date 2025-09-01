@@ -56,7 +56,7 @@ def extract_song_info_from_url(session, url, console):
                                     'byArtist': first_song.get('primary_artists', 'Unknown Artist'),
                                     'inAlbum': first_song.get('album', 'Unknown Album'),
                                     'duration': first_song.get('duration', ''),
-                                    'image': first_song.get('image', '')
+                            'image_url': first_song.get('image', [{'url': ''}])[0].get('url', '') if isinstance(first_song.get('image'), list) else first_song.get('image', '')
                                 }
                     except json.JSONDecodeError:
                         pass
@@ -71,7 +71,7 @@ def extract_song_info_from_url(session, url, console):
                            if isinstance(song_data.get('inAlbum'), dict)
                            else song_data.get('inAlbum', 'Unknown Album'),
                     'duration': song_data.get('duration', ''),
-                    'image_url': song_data.get('image', '')
+                    'image_url': song_data.get('image', [{'url': ''}])[0].get('url', '') if isinstance(song_data.get('image'), list) else song_data.get('image', '')
                 }
             
             # Fallback: extract from URL and HTML title

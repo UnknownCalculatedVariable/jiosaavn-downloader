@@ -38,9 +38,14 @@ def main():
     
     if success:
         downloader.console.print("[bold green]Download completed successfully![/bold green]")
+        return 0  # Success
     else:
         downloader.console.print("[bold red]Download failed![/bold red]")
+        return 1  # Error
+        return 1  # Return error code
+
+    return 0  # Return success code
 
 
 if __name__ == "__main__":
-    main()
+    exit(main())
