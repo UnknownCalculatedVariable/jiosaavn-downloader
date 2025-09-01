@@ -22,7 +22,7 @@ A Python tool to download songs from JioSaavn with customizable format and bitra
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/jiosaavn-downloader.git
+   git clone https://github.com/UnknownCalculatedVariable/jiosaavn-downloader.git
    cd jiosaavn-downloader
    ```
 
@@ -107,10 +107,6 @@ jiosaavn-downloader/
 ├── config.json
 └── README.md
 ```
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Disclaimer
 
