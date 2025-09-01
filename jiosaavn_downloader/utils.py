@@ -25,7 +25,7 @@ def extract_song_info_from_url(session, url, console):
             html_content = response.text
             
             # Try to find song data in script tags
-            pattern = r'<script type="application/ld\+json">(.*?)</script>'
+            pattern = r'<script type="application/ld\\+json">(.*?)</script>'
             matches = re.findall(pattern, html_content, re.DOTALL)
             
             song_data = None
@@ -38,9 +38,10 @@ def extract_song_info_from_url(session, url, console):
                 except json.JSONDecodeError:
                     continue
             
+            # If we still don't have song data, try alternative method
             if not song_data:
                 # Alternative method: look for window.__INITIAL_DATA__
-                pattern = r'window\.__INITIAL_DATA__\s*=\s*({.*?});'
+                pattern = r'window\\.__INITIAL_DATA__\\s*=\\s*({.*?});'
                 match = re.search(pattern, html_content, re.DOTALL)
                 if match:
                     try:
@@ -51,27 +52,97 @@ def extract_song_info_from_url(session, url, console):
                             songs = data['entities']['songs']
                             if songs:
                                 first_song = list(songs.values())[0]
+                                # Try to get image URL from the correct path
+                                image_data = first_song.get('image')
+                                image_url = ''
+                                if isinstance(image_data, list) and len(image_data) > 0:
+                                    # Get the highest quality image
+                                    image_url = image_data[0].get('url', '') if isinstance(image_data[0], dict) else str(image_data[0])
+                                elif isinstance(image_data, str):
+                                    image_url = image_data
+                                
                                 song_data = {
                                     'name': first_song.get('title', 'Unknown Title'),
                                     'byArtist': first_song.get('primary_artists', 'Unknown Artist'),
                                     'inAlbum': first_song.get('album', 'Unknown Album'),
                                     'duration': first_song.get('duration', ''),
-                            'image_url': first_song.get('image', [{'url': ''}])[0].get('url', '') if isinstance(first_song.get('image'), list) else first_song.get('image', '')
+                                    'image': image_url
                                 }
                     except json.JSONDecodeError:
                         pass
             
+            # If we still don't have song data, try another approach
+            if not song_data:
+                # Look for specific meta tags
+                title_match = re.search(r'<meta property="og:title" content="(.*?)"', html_content)
+                image_match = re.search(r'<meta property="og:image" content="(.*?)"', html_content)
+                
+                if title_match:
+                    title = title_match.group(1)
+                    # Try to extract artist from title (often in format "Song Name - Artist Name")
+                    parts = title.split(' - ')
+                    song_name = parts[0] if len(parts) > 0 else title
+                    artist_name = parts[1] if len(parts) > 1 else 'Unknown Artist'
+                    
+                    song_data = {
+                        'name': song_name,
+                        'byArtist': artist_name,
+                        'inAlbum': 'Unknown Album',
+                        'duration': '',
+                        'image': image_match.group(1) if image_match else ''
+                    }
+            
             if song_data:
+                # Extract title
+                title = song_data.get('name', 'Unknown Title')
+                
+                # Extract artist - handle both dict and string formats
+                artist = 'Unknown Artist'
+                by_artist = song_data.get('byArtist')
+                if isinstance(by_artist, dict):
+                    artist = by_artist.get('name', 'Unknown Artist')
+                elif isinstance(by_artist, str):
+                    artist = by_artist
+                elif by_artist:
+                    artist = str(by_artist)
+                    
+                # Extract album - handle both dict and string formats
+                album = 'Unknown Album'
+                in_album = song_data.get('inAlbum')
+                if isinstance(in_album, dict):
+                    album = in_album.get('name', 'Unknown Album')
+                elif isinstance(in_album, str):
+                    album = in_album
+                elif in_album:
+                    album = str(in_album)
+                
+                # Extract duration
+                duration = song_data.get('duration', '')
+                
+                # Extract image URL - handle both list and string formats
+                image_url = ''
+                image_data = song_data.get('image')
+                if isinstance(image_data, list) and len(image_data) > 0:
+                    image_url = image_data[0].get('url', '') if isinstance(image_data[0], dict) else str(image_data[0])
+                elif isinstance(image_data, str):
+                    image_url = image_data
+                elif image_data:
+                    image_url = str(image_data)
+                
+                # Additional fallback for image URL if not found
+                if not image_url:
+                    # Try to find any image URL in the HTML
+                    img_pattern = r'"image":\s*\[?"([^"]*)'
+                    img_match = re.search(img_pattern, html_content)
+                    if img_match:
+                        image_url = img_match.group(1)
+                
                 return {
-                    'title': song_data.get('name', 'Unknown Title'),
-                    'artist': song_data.get('byArtist', {}).get('name', 'Unknown Artist') 
-                            if isinstance(song_data.get('byArtist'), dict) 
-                            else song_data.get('byArtist', 'Unknown Artist'),
-                    'album': song_data.get('inAlbum', {}).get('name', 'Unknown Album') 
-                           if isinstance(song_data.get('inAlbum'), dict)
-                           else song_data.get('inAlbum', 'Unknown Album'),
-                    'duration': song_data.get('duration', ''),
-                    'image_url': song_data.get('image', [{'url': ''}])[0].get('url', '') if isinstance(song_data.get('image'), list) else song_data.get('image', '')
+                    'title': title,
+                    'artist': artist,
+                    'album': album,
+                    'duration': duration,
+                    'image_url': image_url
                 }
             
             # Fallback: extract from URL and HTML title
@@ -137,7 +208,11 @@ def download_cover_art(session, url, filename, console):
                     f.write(data)
                     progress.update(download_task, advance=len(data))
         
-        return filename
+        # Verify file was created and has content
+        if os.path.exists(filename) and os.path.getsize(filename) > 0:
+            return filename
+        else:
+            return None
     except Exception as e:
         console.print(f"[red]Error downloading cover art: {e}[/red]")
         return None

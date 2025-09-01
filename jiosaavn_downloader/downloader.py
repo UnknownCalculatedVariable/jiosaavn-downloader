@@ -93,7 +93,9 @@ class JioSaavnDownloader:
             '--no-check-certificate',  # Avoid SSL issues
             '--no-warnings',  # Reduce unnecessary output
             '--quiet',  # Reduce verbosity
-            '--no-call-home'  # Disable telemetry
+            '--no-call-home',  # Disable telemetry
+            '--prefer-free-formats',  # Prefer open formats
+            '--no-abort-on-error'  # Continue even if some errors occur
         ]
         
         # For audio-only downloads, specify we want the best audio stream only
@@ -216,8 +218,8 @@ class JioSaavnDownloader:
         
         # Extract song information
         song_info = self.extract_song_info(url)
-        if not song_info:
-            self.console.print("[red]Failed to extract song information[/red]")
+        if not song_info or song_info['title'] == 'Unknown Title':
+            self.console.print("[red]Failed to extract valid song information[/red]")
             return False
             
         self.console.print(Panel.fit(
@@ -230,7 +232,8 @@ class JioSaavnDownloader:
         if song_info.get('image_url'):
             cover_filename = f"cover_{hash(url)}.jpg"
             cover_path = os.path.join(output_dir, cover_filename)
-            self.download_cover_art(song_info['image_url'], cover_path)
+            if not self.download_cover_art(song_info['image_url'], cover_path):
+                cover_path = None  # Reset if download failed
         
         # Search and download using yt-dlp
         downloaded_file = self.search_and_download(song_info, output_dir, format, bitrate)
