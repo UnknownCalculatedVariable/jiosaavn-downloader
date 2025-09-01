@@ -28,12 +28,17 @@ A Python tool to download songs from JioSaavn with customizable format and bitra
 
 2. Install the required Python packages:
    ```bash
+   # Create a virtual environment (recommended)
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   
+   # Install dependencies
    pip install -r requirements.txt
    ```
 
 3. Install yt-dlp:
    ```bash
-   # Using pip
+   # Using pip (within the virtual environment)
    pip install yt-dlp
    
    # Or using your system package manager
@@ -59,6 +64,10 @@ A Python tool to download songs from JioSaavn with customizable format and bitra
 ## Usage
 
 ```bash
+# Activate the virtual environment first
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Then run the tool
 python main.py [JIO_SAAVN_URL] [OPTIONS]
 ```
 
