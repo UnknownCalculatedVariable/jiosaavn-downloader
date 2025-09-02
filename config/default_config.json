@@ -1,0 +1,7 @@
+{
+  "output_directory": "./outputs",
+  "default_format": "flac",
+  "album_layout": false,
+  "embed_thumbnail": true,
+  "add_metadata": true
+}

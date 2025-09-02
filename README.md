@@ -1,122 +1,81 @@
 # JioSaavn Downloader
 
-A Python tool to download songs from JioSaavn with customizable format and bitrate. This tool extracts metadata from JioSaavn URLs, searches for the song on YouTube using yt-dlp, downloads it in your preferred format, and adds the original metadata including cover art.
+A Python tool to download songs and albums from JioSaavn with embedded cover art and metadata.
 
 ## Features
 
-- Download songs from JioSaavn URLs
-- Multiple audio formats supported: MP3, FLAC, M4A, OPUS, WAV
-- Customizable bitrate for lossy formats (128k, 192k, 256k, 320k)
-- Automatic metadata extraction from JioSaavn (title, artist, album)
-- Cover art embedding
+- Download individual songs or entire albums/playlists
+- Automatically embeds cover art and metadata
+- Supports both FLAC and MP3 (320 kbps) formats
 - Progress bars for downloads
-- Rich terminal interface
-
-## Requirements
-
-- Python 3.6+
-- yt-dlp
-- ffmpeg
+- Organizes files by album/artist
+- Properly tags audio files with metadata
 
 ## Installation
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/UnknownCalculatedVariable/jiosaavn-downloader.git
+   git clone https://github.com/yourusername/jiosaavn-downloader.git
    cd jiosaavn-downloader
    ```
 
-2. Install the required Python packages:
+2. Install the required dependencies:
    ```bash
-   # Create a virtual environment (recommended)
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   
-   # Install dependencies
    pip install -r requirements.txt
    ```
 
-3. Install yt-dlp:
-   ```bash
-   # Using pip (within the virtual environment)
-   pip install yt-dlp
-   
-   # Or using your system package manager
-   # Ubuntu/Debian:
-   sudo apt install yt-dlp
-   
-   # macOS:
-   brew install yt-dlp
-   ```
-
-4. Install ffmpeg:
-   ```bash
-   # Ubuntu/Debian:
-   sudo apt install ffmpeg
-   
-   # macOS:
-   brew install ffmpeg
-   
-   # Windows:
-   # Download from https://ffmpeg.org/download.html
-   ```
+3. Ensure you have `ffmpeg` installed on your system:
+   - Ubuntu/Debian: `sudo apt install ffmpeg`
+   - macOS: `brew install ffmpeg`
+   - Windows: Download from https://ffmpeg.org/download.html
 
 ## Usage
 
-```bash
-# Activate the virtual environment first
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+### Basic Usage
 
-# Then run the tool
-python main.py [JIO_SAAVN_URL] [OPTIONS]
+Download a song or album:
+```bash
+python run.py "https://www.jiosaavn.com/song/some-song/XXXXXXXXX"
 ```
 
 ### Options
 
-- `-o, --output DIR` - Output directory (default: current directory)
-- `-f, --format FORMAT` - Audio format (mp3, flac, m4a, opus, wav) (default: flac)
-- `-b, --bitrate BITRATE` - Audio bitrate (128, 192, 256, 320) (default: 320)
+- `--out DIR`: Specify output directory (default: current directory)
+- `--album`: Force album-style folder layout
+- `--mp3-320`: Download as MP3 at ~320 kbps instead of FLAC
 
 ### Examples
 
-Download a song in FLAC format (lossless):
+Download a song in MP3 format:
 ```bash
-python main.py https://www.jiosaavn.com/song/some-song/long-url-here
+python run.py --mp3-320 "https://www.jiosaavn.com/song/some-song/XXXXXXXXX"
 ```
 
-Download a song in MP3 format at 320kbps:
+Download an album to a specific directory:
 ```bash
-python main.py https://www.jiosaavn.com/song/some-song/long-url-here -f mp3 -b 320
+python run.py --out "/path/to/music" "https://www.jiosaavn.com/album/some-album/XXXXXXXXX"
 ```
-
-Download a song to a specific directory:
-```bash
-python main.py https://www.jiosaavn.com/song/some-song/long-url-here -o ~/Music
-```
-
-## How It Works
-
-1. The tool extracts metadata (title, artist, album, cover art) from the JioSaavn URL
-2. It uses yt-dlp to search YouTube for the song using the extracted metadata
-3. The song is downloaded in the specified format and bitrate
-4. Metadata and cover art are embedded into the downloaded file using mutagen
 
 ## Project Structure
 
 ```
 jiosaavn-downloader/
-├── jiosaavn_downloader/
+├── src/
 │   ├── __init__.py
-│   ├── downloader.py
-│   ├── metadata.py
-│   ├── utils.py
-│   └── exceptions.py
-├── main.py
+│   ├── main.py              # Main entry point
+│   ├── downloader.py        # Download logic and progress handling
+│   ├── metadata.py          # Metadata extraction and tagging
+│   ├── utils.py             # Utility functions
+│   └── models.py            # Data models and types
+├── config/
+│   └── default_config.json  # Default configuration
+├── outputs/                 # Default download directory
+├── logs/                    # Log files
 ├── requirements.txt
-├── config.json
-└── README.md
+├── README.md
+└── run.py                  # Simple runner script
 ```
 
-## Disclaimer
+## License
 
-This tool is for educational purposes only. Please respect copyright laws and the terms of service of JioSaavn and YouTube. Only download content that you have the right to access and use.
+This project is licensed under the MIT License - see the LICENSE file for details.
