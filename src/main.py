@@ -3,8 +3,16 @@ Main entry point for the JioSaavn downloader.
 """
 
 import argparse
+import sys
 from pathlib import Path
+from rich.console import Console
+from rich.traceback import install
+
 from .downloader import process_url
+
+# Install rich traceback handler for better error visualization
+install()
+console = Console()
 
 
 def main():
@@ -16,6 +24,11 @@ def main():
     parser.add_argument("--mp3-320", action="store_true", help="Output MP3 ~320 kbps instead of FLAC")
     args = parser.parse_args()
 
+    # Check if help was requested
+    if '-h' in sys.argv or '--help' in sys.argv:
+        parser.print_help()
+        return
+
     out_dir = Path(args.out).expanduser().resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -25,9 +38,9 @@ def main():
     try:
         process_url(args.url, out_dir, to_flac, to_mp3_320, args.album)
     except KeyboardInterrupt:
-        print("\nDownload interrupted by user")
+        console.print("\nDownload interrupted by user")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        console.print(f"An error occurred: {e}")
         import traceback
         traceback.print_exc()
 
